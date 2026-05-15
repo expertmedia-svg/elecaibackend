@@ -8,17 +8,19 @@ const sharp = require('sharp');
 const DiagnosticRecord = require('../models/DiagnosticRecord');
 
 const router = express.Router();
+const uploadDir = path.resolve(__dirname, '..', process.env.UPLOAD_DIR || 'uploads');
+const maxFileSize = Number(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024;
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // ─── Multer config ─────────────────────────────────────────
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.join(__dirname, '../uploads')),
+  destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => cb(null, `${uuidv4()}.jpg`),
 });
 const upload = multer({
   storage,
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: { fileSize: maxFileSize },
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) cb(null, true);
     else cb(new Error('Format image requis'));
