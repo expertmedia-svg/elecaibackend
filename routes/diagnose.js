@@ -78,6 +78,10 @@ Format JSON OBLIGATOIRE:
 // ─── POST /api/diagnose ────────────────────────────────────
 router.post('/', upload.single('image'), async (req, res) => {
   const { device = 'phone', fault = 'nopower', language = 'fr', customPrompt = '' } = req.body;
+  console.log('--- Nouvelle requête de Diagnostic ---');
+  console.log('Appareil:', device);
+  console.log('Panne:', fault);
+  console.log('Message personnalisé:', customPrompt || '(aucun)');
   const diagId = uuidv4();
 
   try {
