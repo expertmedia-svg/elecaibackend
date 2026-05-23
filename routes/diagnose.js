@@ -28,12 +28,13 @@ const upload = multer({
 });
 
 // ─── Prompt système IA ────────────────────────────────────
-function buildSystemPrompt(device, fault, language) {
+function buildSystemPrompt(device, fault, language, customPrompt) {
   return `Tu es ELEC-AI, un expert en diagnostic électronique spécialisé pour l'Afrique.
 Tu analyses des cartes électroniques pour des réparateurs locaux et apprentis.
 
 Appareil: ${device}
 Panne déclarée: ${fault}
+${customPrompt ? `Description personnalisée de la panne / précisions: ${customPrompt}` : ''}
 Langue: ${language || 'fr'}
 
 Règles importantes:
@@ -76,7 +77,7 @@ Format JSON OBLIGATOIRE:
 
 // ─── POST /api/diagnose ────────────────────────────────────
 router.post('/', upload.single('image'), async (req, res) => {
-  const { device = 'phone', fault = 'nopower', language = 'fr' } = req.body;
+  const { device = 'phone', fault = 'nopower', language = 'fr', customPrompt = '' } = req.body;
   const diagId = uuidv4();
 
   try {
@@ -103,7 +104,7 @@ router.post('/', upload.single('image'), async (req, res) => {
         messages: [
           {
             role: 'system',
-            content: buildSystemPrompt(device, fault, language),
+            content: buildSystemPrompt(device, fault, language, customPrompt),
           },
           {
             role: 'user',
@@ -117,7 +118,7 @@ router.post('/', upload.single('image'), async (req, res) => {
               },
               {
                 type: 'text',
-                text: `Analyse cette carte électronique. Appareil: ${device}. Panne: ${fault}. Réponds UNIQUEMENT en JSON.`,
+                text: `Analyse cette carte électronique. Appareil: ${device}. Panne déclarée: ${fault}.${customPrompt ? ` Description du problème spécifique par le technicien: "${customPrompt}". Tiens-en particulièrement compte dans ton diagnostic.` : ''} Réponds UNIQUEMENT en JSON.`,
               },
             ],
           },
