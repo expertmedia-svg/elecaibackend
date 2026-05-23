@@ -41,7 +41,7 @@ Règles importantes:
 - Réponse en JSON strict uniquement, sans markdown
 - Explications simples, accessibles aux débutants
 - Instructions concrètes avec mesures précises
-- Concentre-toi sur les composants courants: condensateurs, fusibles, IC de charge, régulateurs
+- ${customPrompt ? `PRIORITÉ ABSOLUE : Le réparateur a spécifié le problème ou symptôme suivant : "${customPrompt}". Tu dois impérativement focaliser ton analyse visuelle de la carte, tes composants détectés et tes étapes de test autour de cette description précise.` : 'Concentre-toi sur les composants courants: condensateurs, fusibles, IC de charge, régulateurs'}
 - Identifie les zones suspectes avec coordonnées normalisées (0.0 à 1.0)
 
 Format JSON OBLIGATOIRE:
