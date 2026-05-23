@@ -95,6 +95,7 @@ router.post('/', upload.single('image'), async (req, res) => {
 
     // Appel OpenAI Vision
     let aiResponse;
+    let rawText = '';
     try {
       const completion = await openai.chat.completions.create({
         model: 'gpt-4o',
@@ -123,13 +124,20 @@ router.post('/', upload.single('image'), async (req, res) => {
         ],
       });
 
-      const rawText = completion.choices[0].message.content;
+      rawText = completion.choices[0].message.content;
       const cleanJson = rawText.replace(/```json|```/g, '').trim();
       aiResponse = JSON.parse(cleanJson);
 
     } catch (aiError) {
-      console.warn('OpenAI error, using fallback:', aiError.message);
+      console.warn('OpenAI error or parsing failed, using fallback:', aiError.message);
       aiResponse = getFallbackDiagnosis(device, fault);
+
+      // Si OpenAI a renvoyé une réponse en texte libre (refus d'analyse de lapin par exemple),
+      // on l'affiche directement comme la cause probable !
+      if (rawText && rawText.trim().length > 0 && !rawText.trim().startsWith('{')) {
+        aiResponse.probableCause = rawText.trim();
+        aiResponse.recommendedAction = "Veuillez photographier une carte électronique valide pour un diagnostic correct.";
+      }
     }
 
     // Construire réponse finale
